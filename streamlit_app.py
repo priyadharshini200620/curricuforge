@@ -1,20 +1,21 @@
 import streamlit as st
-from huggingface_hub import InferenceClient
+import requests
 
 st.set_page_config(page_title="CurricuForge", layout="wide")
 
 st.title("📚 CurricuForge")
 st.subheader("AI Powered Curriculum Design System")
 
-# Stop app if token missing
 if "HF_TOKEN" not in st.secrets:
     st.error("HF_TOKEN not set in Streamlit Secrets")
     st.stop()
 
-client = InferenceClient(
-    model="google/flan-t5-large",
-    token=st.secrets["HF_TOKEN"]
-)
+API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-large"
+headers = {"Authorization": f"Bearer {st.secrets['HF_TOKEN']}"}
+
+def query(payload):
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.json()
 
 user_input = st.text_area("Enter curriculum topic")
 
@@ -22,12 +23,14 @@ if st.button("Generate Curriculum"):
     if user_input:
         with st.spinner("Generating..."):
             try:
-                response = client.text_generation(
-                    f"Create a detailed academic curriculum for {user_input}. Include objectives, modules, duration, and assessment.",
-                    max_new_tokens=500
-                )
+                output = query({
+                    "inputs": f"Create a detailed curriculum for {user_input}. Include objectives, modules, duration, and assessment."
+                })
 
-                st.write(response)
+                if isinstance(output, list):
+                    st.write(output[0]["generated_text"])
+                else:
+                    st.write(output)
 
             except Exception as e:
                 st.error(f"Error: {e}")
