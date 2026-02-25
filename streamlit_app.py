@@ -1,34 +1,47 @@
 import streamlit as st
-from huggingface_hub import InferenceClient
 
 st.set_page_config(page_title="CurricuForge", layout="wide")
 
 st.title("📚 CurricuForge")
 st.subheader("AI Powered Curriculum Design System")
 
-# Check token
-if "HF_TOKEN" not in st.secrets:
-    st.error("HF_TOKEN missing in secrets.")
-    st.stop()
+def generate_curriculum(grade, subject, duration, approach):
 
-HF_TOKEN = st.secrets["HF_TOKEN"]
+    return f"""
+# Course Overview
+This {duration} {subject} course is designed for {grade} students using a {approach} approach.
 
-# Use stable text-generation model
-client = InferenceClient(
-    model="google/flan-t5-large",
-    token=HF_TOKEN
-)
+The course builds foundational understanding and practical application skills in {subject}.
 
-def generate_curriculum(prompt):
-    try:
-        response = client.text_generation(
-            prompt,
-            max_new_tokens=500,
-            temperature=0.7
-        )
-        return response
-    except Exception as e:
-        return f"Error: {str(e)}"
+# Learning Objectives
+- Understand core concepts of {subject}
+- Apply theoretical knowledge to real-world scenarios
+- Develop analytical and critical thinking skills
+- Complete structured assessments and a capstone
+
+# Weekly Breakdown
+
+## Week 1
+Introduction to fundamental concepts of {subject}
+
+## Week 2
+Core theories and structured exercises
+
+## Week 3
+Applied learning and guided practice
+
+## Week 4
+Review, assessments, and project development
+
+# Assessment Strategy
+- Weekly quizzes
+- Assignments
+- Final evaluation
+- Capstone project
+
+# Capstone Project
+Students will design and present a practical project demonstrating mastery of {subject}.
+"""
 
 with st.sidebar:
     st.header("Curriculum Inputs")
@@ -41,23 +54,7 @@ with st.sidebar:
 if generate:
     if not subject:
         st.warning("Please enter a subject.")
-        st.stop()
-
-    prompt = f"""
-Create a structured curriculum in markdown format with:
-
-# Course Overview
-# Learning Objectives
-# Weekly Breakdown
-# Assessment Strategy
-# Capstone Project
-
-Grade: {grade}
-Subject: {subject}
-Duration: {duration}
-Approach: {approach}
-"""
-
-    with st.spinner("Generating curriculum..."):
-        output = generate_curriculum(prompt)
-        st.markdown(output)
+    else:
+        with st.spinner("Generating curriculum..."):
+            output = generate_curriculum(grade, subject, duration, approach)
+            st.markdown(output)
