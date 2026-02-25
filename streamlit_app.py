@@ -10,8 +10,11 @@ if "HF_TOKEN" not in st.secrets:
     st.error("HF_TOKEN not set in Streamlit Secrets")
     st.stop()
 
-API_URL = "https://api-inference.huggingface.co/models/google/flan-t5-large"
-headers = {"Authorization": f"Bearer {st.secrets['HF_TOKEN']}"}
+API_URL = "https://router.huggingface.co/hf-inference/models/google/flan-t5-large"
+headers = {
+    "Authorization": f"Bearer {st.secrets['HF_TOKEN']}",
+    "Content-Type": "application/json"
+}
 
 def query(payload):
     response = requests.post(API_URL, headers=headers, json=payload)
