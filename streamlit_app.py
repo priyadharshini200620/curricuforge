@@ -1,60 +1,63 @@
-import streamlit as st
-
-st.set_page_config(page_title="CurricuForge", layout="wide")
-
-st.title("📚 CurricuForge")
-st.subheader("AI Powered Curriculum Design System")
-
 def generate_curriculum(grade, subject, duration, approach):
+
+    # Extract number of weeks from duration
+    try:
+        weeks = int(duration.split()[0])
+    except:
+        weeks = 4  # default fallback
+
+    weekly_plan = ""
+
+    for i in range(1, weeks + 1):
+
+        if approach == "Project-Based":
+            if i == 1:
+                topic = f"Introduction to core concepts of {subject}"
+            elif i < weeks:
+                topic = f"Hands-on project development and applied learning in {subject}"
+            else:
+                topic = f"Final project completion and presentation"
+        
+        elif approach == "Lecture-Based":
+            if i == 1:
+                topic = f"Fundamental theories of {subject}"
+            elif i < weeks:
+                topic = f"Advanced concepts and structured exercises in {subject}"
+            else:
+                topic = f"Comprehensive review and final assessment"
+        
+        else:  # Hybrid
+            if i == 1:
+                topic = f"Concept introduction and discussion in {subject}"
+            elif i < weeks:
+                topic = f"Blended learning: theory + practical exercises"
+            else:
+                topic = f"Capstone refinement and evaluation"
+
+        weekly_plan += f"\n## Week {i}\n{topic}\n"
 
     return f"""
 # Course Overview
 This {duration} {subject} course is designed for {grade} students using a {approach} approach.
 
-The course builds foundational understanding and practical application skills in {subject}.
+The course balances conceptual understanding with applied skills.
 
 # Learning Objectives
-- Understand core concepts of {subject}
-- Apply theoretical knowledge to real-world scenarios
-- Develop analytical and critical thinking skills
-- Complete structured assessments and a capstone
+- Develop foundational understanding of {subject}
+- Apply knowledge through structured activities
+- Strengthen analytical thinking
+- Complete a capstone aligned with learning outcomes
 
 # Weekly Breakdown
-
-## Week 1
-Introduction to fundamental concepts of {subject}
-
-## Week 2
-Core theories and structured exercises
-
-## Week 3
-Applied learning and guided practice
-
-## Week 4
-Review, assessments, and project development
+{weekly_plan}
 
 # Assessment Strategy
-- Weekly quizzes
-- Assignments
-- Final evaluation
+- Continuous evaluation
+- Weekly tasks
+- Mid-term review (if applicable)
+- Final assessment
 - Capstone project
 
 # Capstone Project
 Students will design and present a practical project demonstrating mastery of {subject}.
 """
-
-with st.sidebar:
-    st.header("Curriculum Inputs")
-    grade = st.selectbox("Grade Level", ["Primary", "Middle School", "High School", "University"])
-    subject = st.text_input("Subject")
-    duration = st.text_input("Duration (e.g., 4 weeks)")
-    approach = st.selectbox("Teaching Approach", ["Lecture-Based", "Project-Based", "Hybrid"])
-    generate = st.button("Generate Curriculum")
-
-if generate:
-    if not subject:
-        st.warning("Please enter a subject.")
-    else:
-        with st.spinner("Generating curriculum..."):
-            output = generate_curriculum(grade, subject, duration, approach)
-            st.markdown(output)
