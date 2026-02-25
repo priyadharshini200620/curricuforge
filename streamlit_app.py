@@ -1,53 +1,35 @@
 import streamlit as st
-import requests
+from groq import Groq
 
 st.set_page_config(page_title="CurricuForge", layout="wide")
 
 st.title("📚 CurricuForge")
 st.subheader("AI Powered Curriculum Design System")
 
-if "HF_TOKEN" not in st.secrets:
-    st.error("HF_TOKEN not set in Streamlit Secrets")
+if "GROQ_API_KEY" not in st.secrets:
+    st.error("GROQ_API_KEY not set in Streamlit Secrets")
     st.stop()
 
-API_URL = "https://router.huggingface.co/hf-inference/models/google/flan-t5-large"
-
-headers = {
-    "Authorization": f"Bearer {st.secrets['HF_TOKEN']}",
-    "Content-Type": "application/json"
-}
-
-def query(payload):
-    response = requests.post(API_URL, headers=headers, json=payload)
-
-    # Show raw response if error
-    if response.status_code != 200:
-        st.error(f"Status Code: {response.status_code}")
-        st.write(response.text)
-        return None
-
-    try:
-        return response.json()
-    except:
-        st.error("Invalid JSON response received.")
-        st.write(response.text)
-        return None
-
+client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
 user_input = st.text_area("Enter curriculum topic")
 
 if st.button("Generate Curriculum"):
     if user_input:
         with st.spinner("Generating..."):
+            try:
+                response = client.chat.completions.create(
+                    model="llama3-8b-8192",
+                    messages=[
+                        {"role": "system", "content": "You are an expert academic curriculum designer."},
+                        {"role": "user", "content": f"Create a detailed curriculum for {user_input}. Include objectives, modules, duration, and assessment methods."}
+                    ],
+                    temperature=0.7,
+                )
 
-            output = query({
-                "inputs": f"Create a detailed curriculum for {user_input}. Include objectives, modules, duration, and assessment."
-            })
+                st.write(response.choices[0].message.content)
 
-            if output:
-                if isinstance(output, list):
-                    st.write(output[0].get("generated_text", "No text generated."))
-                else:
-                    st.write(output)
+            except Exception as e:
+                st.error(f"Error: {e}")
     else:
         st.warning("Please enter a topic.")
