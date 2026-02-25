@@ -19,7 +19,7 @@ if st.button("Generate Curriculum"):
         with st.spinner("Generating..."):
             try:
                 response = client.chat.completions.create(
-                    model="llama3-8b-8192",
+                    model="mixtral-8x7b-32768",
                     messages=[
                         {"role": "system", "content": "You are an expert academic curriculum designer."},
                         {"role": "user", "content": f"Create a detailed curriculum for {user_input}. Include objectives, modules, duration, and assessment methods."}
